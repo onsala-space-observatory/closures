@@ -6,120 +6,108 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
 file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
-<task type="function" name="closures" category="analysis">
+  <task type="function" name="closures" category="analysis">
+    <shortdescription>Plots closure phases (or amplitudes) vs. time or frequency.</shortdescription>
+    <description>Plots closure phases (or amplitudes) vs. time or frequency, for selected antenna triplets (or quads), frequency range, and/or time range. It also saves results in ascii files, for plotting with other softwares.
+    </description>
 
-  <shortdescription>Plots closure phases (or amplitudes) vs. time or frequency.</shortdescription>
-      
-  <description>Plots closure phases (or amplitudes) vs. time or frequency, for selected antenna triplets (or quads), frequency range, and/or time range. It also saves results in ascii files, for plotting with other softwares.
-</description>
+    <input>
+      <param type="string" name="vis" mustexist="false">
+	<description>Input measurement set.</description>
+	<value></value>
+      </param>
 
+      <param type="string" name="kind" mustexist="false">
+	<description>The kind of closure to compute. Can be either \'amplitude\' or \'phase\'.</description>
+	<value>phase</value>
+      </param>
 
-<input>
+      <param type="string" name="xaxis" mustexist="false">
+	<description>The quantity to compute (and plot) the closures against of. It can be either \'frequency\' or \'time\'.</description>
+	<value>frequency</value>
+      </param>
 
-    <param type="string" name="vis" mustexist="false">
-      <description>Input measurement set.</description>
-      <value></value>
-    </param>
+      <param type="string" name="column" mustexist="false">
+	<description>Data column to use. Can be either \'data\', \'corrected\', or \'model\'. It must exist in the measurement set.</description>
+	<value>data</value>
+      </param>
 
-    <param type="string" name="kind" mustexist="false">
-      <description>The kind of closure to compute. Can be either \'amplitude\' or \'phase\'.</description>
-      <value>phase</value>
-    </param>
+      <param type="string" name="field" mustexist="false">
+	<description>field id (or field name) of the selected source. If the source is observed in mosaic mode, the first pointing will be taken. If field = -1, the first source observed in the ms will be taken.</description>
+	<value>-1</value>
+      </param>
 
-    <param type="string" name="xaxis" mustexist="false">
-      <description>The quantity to compute (and plot) the closures against of. It can be either \'frequency\' or \'time\'.</description>
-      <value>frequency</value>
-    </param>
+      <param type="string" name="spw" mustexist="false">
+	<description>Spectral window and channel range to use. Only one spectral window at  a time is allowed (e.g., \'1:50~100\' selects channels from 50 to 100 in spw number 1).</description>
+	<value>0</value>
+      </param>
 
+      <param type="int" name="scan" mustexist="false">
+	<description>If not negative, scan number to take for computing the closures. It overrides the \'field\' parameter.</description>
+	<value>-1</value>
+      </param>
 
-    <param type="string" name="column" mustexist="false">
-      <description>Data column to use. Can be either \'data\', \'corrected\', or \'model\'. It must exist in the measurement set.</description>
-      <value>data</value>
-    </param>
+      <param type="string" name="timerange" mustexist="false">
+	<description>A string representing the timerange (in CASA syntax) for the data to be selected. E.g.: \'2010/09/10/09:05:00~2010/09/10/09:10:00\'. It overrides the \'scan\' parameter, but not the \'field\' parameter.</description>
+	<value></value>
+      </param>
 
+      <param type="any" name="antennas" mustexist="false">
+	<description>List of names of the antennas that *should* appear in all the computed closures. If empty, all possible closures will be computed. E.g.: antennas=[\'DV08\'] will compute all closures where antenna DV08 appears.</description>
+	<value>[]</value>
+      </param>
 
-    <param type="string" name="field" mustexist="false">
-      <description>field id (or field name) of the selected source. If the source is observed in mosaic mode, the first pointing will be taken. If field = -1, the first source observed in the ms will be taken.</description>
-      <value>-1</value>
-    </param>
+      <param type="boolean" name="do_model" mustexist="false">
+	<description>boolean. Whether to subtract the model from the data closures. If true, the closures will correspond to the *residual* visibilities (i.e., observations minus model). Of course, this makes no sense if column is set to \'model\'!</description>
+	<value>False</value>
+      </param>
 
+      <param type="boolean" name="plot" mustexist="false">
+	<description>Whether to make plots of closures versus frequency/time (for each triplet/quadruplet of antennas) or only compute and save these closures in an external ascii file (to be plotted later by the user with another program).</description>
+	<value>False</value>
+      </param>
 
-    <param type="string" name="spw" mustexist="false">
-      <description>Spectral window and channel range to use. Only one spectral window at  a time is allowed (e.g., \'1:50~100\' selects channels from 50 to 100 in spw number 1).</description>
-      <value>0</value>
-    </param>
+      <param type="boolean" name="histogram" mustexist="false">
+	<description>Whether to compute antenna-based closure histograms. This may be useful to look for very bad (or good!) antennas, based on their closures.</description>
+	<value>False</value>
+      </param>
 
-    <param type="int" name="scan" mustexist="false">
-      <description>If not negative, scan number to take for computing the closures. It overrides the \'field\' parameter.</description>
-      <value>-1</value>
-    </param>
+      <param type="string" name="outdir" mustexist="false">
+	<description>Name of the directory where all output files will be written.</description>
+	<value>closures.results</value>
+      </param>
 
+      <param type="any" name="xlims" mustexist="false">
+	<description>Maximum closure to plot (degrees for phase, percentage for amplitude) and number of bins for the histograms. E.g.: [45,100], for kind=\'phase\', would plot phase closures up to 45 degrees, and histograms with 100 bins. If lower or equal than 0, the default is taken: 180 degrees and 10% (for phase and amplitude, respectively) and histograms with 50 bins.</description>
+	<value>[0,0]</value>
+      </param>
 
-    <param type="string" name="timerange" mustexist="false">
-      <description>A string representing the timerange (in CASA syntax) for the data to be selected. E.g.: \'2010/09/10/09:05:00~2010/09/10/09:10:00\'. It overrides the \'scan\' parameter, but not the \'field\' parameter.</description>
-      <value></value>
-    </param>
+      <constraints>
+      </constraints>
+    </input>
 
-    <param type="any" name="antennas" mustexist="false">
-      <description>List of names of the antennas that *should* appear in all the computed closures. If empty, all possible closures will be computed. E.g.: antennas=[\'DV08\'] will compute all closures where antenna DV08 appears.</description>
-      <value>[]</value>
-    </param>
+    <returns type="bool"/>
 
-    <param type="boolean" name="do_model" mustexist="false">
-      <description>boolean. Whether to subtract the model from the data closures. If true, the closures will correspond to the *residual* visibilities (i.e., observations minus model). Of course, this makes no sense if column is set to \'model\'!</description>
-      <value>False</value>
-    </param>
+    <example>
+This task is intended to be helpful especially for (early) checks of data
+quality, even before beginning with any calibration. Closure quantities
+(either phase or amplitudes closures) are independent of antenna gains, so
+any problem inherent to the data (i.e., independent of the calibration)
+should appear crystal-clear in the closure plots, especially those
+regarding the strongest sources (i.e., flux and/or bandpass calibrators).
 
-    <param type="boolean" name="plot" mustexist="false">
-      <description>Whether to make plots of closures versus frequency/time (for each triplet/quadruplet of antennas) or only compute and save these closures in an external ascii file (to be plotted later by the user with another program).</description>
-      <value>False</value>
-    </param>
-
-    <param type="boolean" name="histogram" mustexist="false">
-      <description>Whether to compute antenna-based closure histograms. This may be useful to look for very bad (or good!) antennas, based on their closures.</description>
-      <value>False</value>
-    </param>
-
-    <param type="string" name="outdir" mustexist="false">
-      <description>Name of the directory where all output files will be written.</description>
-      <value>closures.results</value>
-    </param>
-
-    <param type="any" name="xlims" mustexist="false">
-      <description>Maximum closure to plot (degrees for phase, percentage for amplitude) and number of bins for the histograms. E.g.: [45,100], for kind=\'phase\', would plot phase closures up to 45 degrees, and histograms with 100 bins. If lower or equal than 0, the default is taken: 180 degrees and 10% (for phase and amplitude, respectively) and histograms with 50 bins.</description>
-      <value>[0,0]</value>
-    </param>
-
-
-
-  <constraints>
-  </constraints>
-
-</input>
-
-  <returns type="bool"/>
-
-  <example>
-
-This task is intended to be helpful especially for (early) checks of data 
-quality, even before beginning with any calibration. Closure quantities 
-(either phase or amplitudes closures) are independent of antenna gains, so 
-any problem inherent to the data (i.e., independent of the calibration) 
-should appear crystal-clear in the closure plots, especially those 
-regarding the strongest sources (i.e., flux and/or bandpass calibrators). 
-
-This task can generate such plots and/or save the closure data in an 
-external ascii file, so the user can later check and plot the closures 
-by him/herself. The task also sorts the antennas from best to worse, in 
+This task can generate such plots and/or save the closure data in an
+external ascii file, so the user can later check and plot the closures
+by him/herself. The task also sorts the antennas from best to worse, in
 terms of the statistics of the closures where each antenna is involved.
 
 The closures can be either averaged in time or in frequency. Notice that
-what is averaged are the closures, not the visibilities, so these averages 
+what is averaged are the closures, not the visibilities, so these averages
 do NOT depend on neither bandpass nor fringe-rate effects!
 
-If the average is done in frequency, then the closures can be plotted as 
+If the average is done in frequency, then the closures can be plotted as
 a function of time, and viceversa. Which quantities are used in the averaging
-and plotting depend on the value of the xaxis parameter. The default is 
+and plotting depend on the value of the xaxis parameter. The default is
 xaxis = \'frequency\', so the closures are averaged in time and returned
 by the task as a function of frequency.
 
@@ -127,56 +115,52 @@ The ascii files generated by this task are:
 
 \'antennas.dat\' -> where the antenna names and their indices are saved.
 
-\'frequencies.dat\' -> If xaxis=\'frequency\', all the frequencies, and 
+\'frequencies.dat\' -> If xaxis=\'frequency\', all the frequencies, and
                        their channel indices, will be saved here.
 
-\'juliandates.dat\' -> If xaxis=\'time\', the Modified Julian Dates, and 
+\'juliandates.dat\' -> If xaxis=\'time\', the Modified Julian Dates, and
                        their time indices, will be saved here.
 
-\'*.closures.dat\' -> All closures will be saved here, in rows with several 
+\'*.closures.dat\' -> All closures will be saved here, in rows with several
                       columns. The quantities for each column are:
 
-  Col. 1: POLARIZATION (e.g., XX, YY, RR, or LL) 
+  Col. 1: POLARIZATION (e.g., XX, YY, RR, or LL)
 
-  Col. 2: FREQ. OR TIME INDEX  (from these indices, the user can get 
-          the actual values of frequencies and times, looking at the files 
-          \'frequencies.dat\' and \'juliandates.dat\'    
+  Col. 2: FREQ. OR TIME INDEX  (from these indices, the user can get
+          the actual values of frequencies and times, looking at the files
+          \'frequencies.dat\' and \'juliandates.dat\'
 
-  Col. 3-5(6): ANTENNA INDICES: indices of the antennas involved in the 
-               triplet (or quadruplet) of the closure. The actual antenna 
-               names can be taken from the file \'antennas.dat\' 
+  Col. 3-5(6): ANTENNA INDICES: indices of the antennas involved in the
+               triplet (or quadruplet) of the closure. The actual antenna
+               names can be taken from the file \'antennas.dat\'
 
   Col. 6-7 (or 7-8):  CLOSURE AND CLOSURE ERROR
 
 
-If plot=True, the task will generate plots of all these data and save 
-them as EPS files (one file per triplet/quadruplet of antennas) in a 
-subdirectory called "plots". Notice that if the number of antennas is 
-large (and the \'antennas\' parameter is set to [], so all closures 
-are computed) the number of these plots can be HUGE (from hundreds 
+If plot=True, the task will generate plots of all these data and save
+them as EPS files (one file per triplet/quadruplet of antennas) in a
+subdirectory called "plots". Notice that if the number of antennas is
+large (and the \'antennas\' parameter is set to [], so all closures
+are computed) the number of these plots can be HUGE (from hundreds
 to thousands!).
 
 
 If histogram=True, the task will generate two kinds of 2D histograms:
 
-  1.- All closures for all times and frequencies (files 
+  1.- All closures for all times and frequencies (files
       called HISTO_*_ALLANTS*.eps). These histograms will show the
-      distribution of closures as a function of closure value and antenna 
-      number, so they may be useful to see, at a glance, if there is(are) 
+      distribution of closures as a function of closure value and antenna
+      number, so they may be useful to see, at a glance, if there is(are)
       problematic antenna(s) in the data.
 
-  2.- Closures averaged for each antenna (files called HISTO_*_vs_*_*.eps). 
-      This will show the histogram of closures for each antenna, as a 
+  2.- Closures averaged for each antenna (files called HISTO_*_vs_*_*.eps).
+      This will show the histogram of closures for each antenna, as a
       function of frequency or time (depending on the value of xaxis),
-      and may be useful to detect problematic frequency channels (or 
+      and may be useful to detect problematic frequency channels (or
       observing times) in the data.
 
-The number of histogram plots is not large (basically, one plot per 
+The number of histogram plots is not large (basically, one plot per
 antenna plus two additional plots for the all-antenna histograms).
-
-</example>
-</task>
-
+    </example>
+  </task>
 </casaxml>
-
-
