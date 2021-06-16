@@ -11,18 +11,15 @@ Steps to install the `closures` task into `casa`
 cd $HOME/.casa/NordicTools
 git clone <repository url>
 cd closures
-buildmytasks
+buildmytasks --module closures closures.xml
 ```
- 2. Edit the file `$HOME/.casa/init.py`. Add the line:
+ 2. Inside `casa` add the folder to your `PYTHONPATH`:
 
-``` shell
-execfile('$HOME/.casa/NordicTools/closures/mytasks.py')
-```
+``` python
+CASA <1>: sys.path.insert(0, <path to closures folder>)
+CASA <2>: from closures.gotasks.closures import closures
+CASA <3>: inp(closures)
 
-That's it! You should be able to run the new task in CASA! Just doing:
-
-``` shell
-tget closures
 ```
 
-inside `casa` should load the task. To get help, just type `help closures`
+That's it! Enjoy!
