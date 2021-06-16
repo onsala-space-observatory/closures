@@ -13,15 +13,15 @@ def from_CASA_syntax(list0, totlist, whatami, default):
     if whatami == 'spw':
 
         if ',' in list0:
-            print 'Only one spw is allowed at a time!'
+            print('Only one spw is allowed at a time!')
             return 0, 0, False
 
         if ':' in list0:
             colind = list0.index(':')
             try:
-                mypsw = int(list0[:colind])
+                myspw = int(list0[:colind])
             except:
-                print 'Bad spw syntax!'
+                print('Bad spw syntax!')
                 return 0, 0, False
             chran = list0[colind+1:].split('~')
             try:
@@ -31,19 +31,19 @@ def from_CASA_syntax(list0, totlist, whatami, default):
                 else:
                     ch1 = ch0+1
             except:
-                print 'Bad spw syntax!'
+                print('Bad spw syntax!')
                 return 0, 0, False
             if ch0 < totlist[1][myspw] and ch1 < totlist[1][myspw] and ch0 < ch1:
                 return myspw, [ch0, ch1], True
             else:
-                print 'Bad channel range! Will take all the spw!'
+                print('Bad channel range! Will take all the spw!')
                 return myspw, [0, totlist[1][myspw]-1], True
 
         else:
             try:
                 myspw = int(list0)
             except:
-                print 'Bad spw syntax!'
+                print('Bad spw syntax!')
                 return 0, 0, False
             return myspw, [0, totlist[1][myspw]], True
 
@@ -55,7 +55,7 @@ def from_CASA_syntax(list0, totlist, whatami, default):
             list1 = [totlist[index] for index in indices]  # Assign elements.
             return list1, True
         except:
-            print 'Bad antenna list! Check that all antennas are in the MS!'
+            print('Bad antenna list! Check that all antennas are in the MS!')
             return 0, False
 
 def ClosComp(CDATA, MDATA, SelBas, baselines, q):

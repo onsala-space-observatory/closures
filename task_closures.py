@@ -25,7 +25,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
 
     # Set the dictionary to select the data:
     if column not in ['data', 'corrected_data', 'corrected', 'model']:
-        print 'Bad string to design data column. Will use \'data\'.'
+        print('Bad string to design data column. Will use \'data\'.')
         column = 'data'
     if column == 'corrected':
         column = 'corrected_data'
@@ -35,23 +35,23 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         cols += ['model_data']
 
     if do_model and column == 'model':
-        print '\n It has no sense to plot model minus model! Aborting!'
+        print('\n It has no sense to plot model minus model! Aborting!')
         return False
 
     sdic = {}
 
     if type(xlims) is not list:
-        print 'Bad xlims. it should be a list. Setting it to its default: [0,0]'
+        print('Bad xlims. it should be a list. Setting it to its default: [0,0]')
         xlims = [0, 0]
     elif len(xlims) != 2:
-        print 'Bad xlims. Should have 2 items. Setting it to its default: [0,0]'
+        print('Bad xlims. Should have 2 items. Setting it to its default: [0,0]')
         xlims = [0, 0]
 
     try:
         xlims[0] = int(xlims[0])
         xlims[1] = int(xlims[1])
     except:
-        print 'Bad xlims. Should be a list of two integers. Setting it to its default: [0,0]'
+        print('Bad xlims. Should be a list of two integers. Setting it to its default: [0,0]')
         xlims = [0, 0]
 
     xxlim = [0, 0]
@@ -65,7 +65,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         xxlim[1] = xlims[1]
 
     if kind not in ['phase', 'amplitude']:
-        print '\n\n   Unkown "kind" parameter. Valid values are "phase" or "amplitude"\n'
+        print('\n\n   Unkown "kind" parameter. Valid values are "phase" or "amplitude"\n')
         return False
 
 #############################
@@ -94,7 +94,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
     antennas, success2 = from_CASA_syntax(antennas, nants, 'antenna', [])
 
     if not (success and success2):
-        print '\n Check spw and antennas. Aborting!'
+        print('\n Check spw and antennas. Aborting!')
         return False
 
 
@@ -121,25 +121,24 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
     numbas = range(len(baselines))
     numant = range(len(nants))
 
-    antlist = open(os.path.join(outdir, 'antennas.dat'), 'w')
+    with open(os.path.join(outdir, 'antennas.dat'), 'w') as antlist:
+        print('! Index    Antenna name', file=antlist)
 
-    print >> antlist, '! Index    Antenna name'
-
-    for k, ant in enumerate(nants):
-        print >> antlist, '%3i      %10s' % (k, ant)
+        for k, ant in enumerate(nants):
+            print('%3i      %10s' % (k, ant), file=antlist)
 
     antlist.close()
 
-    print '\nOpening dataset.'
+    print('\nOpening dataset.')
     if not ms.open(vis):
-        print "Bad measurement set!"
+        print("Bad measurement set!")
         return False
 
     # Get either the scan number or the source/timerange pair:
     try:
         scan = int(scan)
     except:
-        print 'scan must be an integer. Aborting!'
+        print('scan must be an integer. Aborting!')
         return False
 
     if type(field) is str:
@@ -149,7 +148,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
             pass
 
     if type(timerange) is not str:
-        print '\'timerange\' must be a string. Aborting!'
+        print('\'timerange\' must be a string. Aborting!')
         return False
 
     if len(timerange) == 0:
@@ -157,51 +156,50 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
     else:
         timerang = timerange.split('~')
         if len(timerang) != 2:
-            print '\'timerange\' is not formatted as a time range (i.e., like \'t0~t1\'). Aborting!'
+            print('\'timerange\' is not formatted as a time range (i.e., like \'t0~t1\'). Aborting!')
             return False
 
     if (type(antennas) is not list):
-        print '\'antennas\' must be a list of strings. Aborting!'
+        print('\'antennas\' must be a list of strings. Aborting!')
         return False
 
     if scan >= 0:
-        print 'Selecting data based on scan number ', scan
+        print('Selecting data based on scan number ', scan)
         ms.selectinit(datadescid=sp)
         scrange = map(int, ms.range(['scan_number'])['scan_number'])
         if scan not in scrange:
-            print 'Selected scan number (', scan, ') is not in list of scans: ', scrange
+            print('Selected scan number (', scan, ') is not in list of scans: ', scrange)
             ms.close()
             return False
         else:
             sdic['scan_number'] = scan
             ms.select(sdic)
             mysource = ms.getdata(['field_id'])['field_id'][0]
-            print 'This scan is an observation of source: '+sournames[mysource]
+            print('This scan is an observation of source: '+sournames[mysource])
 
 # If the scan number is not set, get the source id...:
     else:
         nofield = False
         if type(field) is int and field > -1:
             if field > len(sournames)-1:
-                print '\'field\' parameter is larger than number of fields: ', len(
-                    sournames)
+                print('\'field\' parameter is larger than number of fields: ', len(sournames))
                 return False
             else:
                 sdic['field_id'] = field
-                print 'Selected field:', sournames[field]
+                print('Selected field:', sournames[field])
         elif type(field) is str:
             try:
                 sid = sournames.index(field)
                 sdic['field_id'] = sid
-                print 'Selected field '+field+', with id number', sid
+                print('Selected field '+field+', with id number', sid)
             except:
-                print 'Field '+field+' is not found in the data!'
-                print 'Valid fields are: ', sournames
-                print 'Will try to take the data based on timerange (or just take the first scan).'
+                print('Field '+field+' is not found in the data!')
+                print('Valid fields are: ', sournames)
+                print('Will try to take the data based on timerange (or just take the first scan).')
                 nofield = True
         else:
-            print 'No field given (either it is not set, or it is neither an integer nor a string).'
-            print 'Will guess source id from the timerange, if possible.'
+            print('No field given (either it is not set, or it is neither an integer nor a string).')
+            print('Will guess source id from the timerange, if possible.')
             nofield = True
 
 # ...and/or get the timerange:
@@ -213,13 +211,13 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                 timer = [t1[0], t2[0]]
                 sdic['time'] = timer
             except:
-                print 'Bad format in timerange string. Will take the source\'s first scan.'
+                print('Bad format in timerange string. Will take the source\'s first scan.')
                 notsel = True
         else:
             notsel = True
 
         if notsel:
-            print 'Selecting times based on first scan.'
+            print('Selecting times based on first scan.')
             ms.selectinit(datadescid=sp)
             ms.select(sdic)
             myscan = ms.range(['scan_number'])['scan_number'][0]
@@ -228,8 +226,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                 ms.selectinit(datadescid=sp)
                 ms.select(sdic)
                 mysource = ms.getdata(['field_id'])['field_id'][0]
-                print 'This scan is an observation of source: ' + \
-                    sournames[mysource]
+                print('This scan is an observation of source: ' + sournames[mysource])
 
 
 ####################################
@@ -271,7 +268,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
     head = '! POL  |  %4s idx.  |  %s    |      closure       |   error' % (
         xaxis[:4], {'phase': 'triplet', 'amplitude': 'quadruplet'}[kind])
 
-    print >> output, head
+    print(head, file=output)
     outformat = out1 + "   % .11e  % .11e"
 
 
@@ -283,13 +280,13 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         ms.open(vis)
         ms.selectinit(datadescid=sp)
 
-        print '\nGetting data and averaging.'
+        print('\nGetting data and averaging.')
 
         tempsel = ms.select(items=sdic)
-    # print sdic
+    # print(sdic)
         temp1 = ms.getdata(cols, ifraxis=True, average=False)
         if not tempsel or len(temp1[column]) == 0:
-            print 'NO VALID DATA FOR SPW #', sp
+            print('NO VALID DATA FOR SPW #', sp)
             return False
 
 # Get the polarization labels:
@@ -312,7 +309,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         NPOL, NCHAN, NBAS, NTIME = np.shape(temp1[column])
         nchan = chans[1]-chans[0]  # channel dimensions to work with.
 
-        print 'Arranging data.'
+        print('Arranging data.')
 
         CDATA = np.ma.array(temp1[column][parhand, chans[0]:chans[1], :],
                             mask=temp1['flag'][parhand, chans[0]:chans[1], :])
@@ -339,17 +336,15 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
             xlabel = 'MJD (days)'
 
         if kind == 'phase':
-            ClosStats = [
-                np.zeros((len(parhand), Ncombs1[a], len(xaxplot))) for a in numant]
+            ClosStats = [np.zeros((len(parhand), Ncombs1[a], len(xaxplot))) for a in numant]
         else:
-            ClosStats = [
-                np.zeros((len(parhand), 3*Ncombs2[a], len(xaxplot))) for a in numant]
+            ClosStats = [np.zeros((len(parhand), 3*Ncombs2[a], len(xaxplot))) for a in numant]
 
         Nread = [[0 for a in numant] for b in parhand]
 
-        print >> output2, '! Index    '+xlabel
+        print('! Index    '+xlabel, file=output2)
         for i, xi in enumerate(xaxplot):
-            print >> output2, '%5i  %.11e' % (i, xi)
+            print('%5i  %.11e' % (i, xi), file=output2)
 
         output2.close()
 
@@ -377,10 +372,10 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
 # Compute all closures:
 
         if kind == 'phase':
-            print '\n Computing closure phases.\n'
+            print('\n Computing closure phases.\n')
             totiter = len(triplets)
         else:
-            print '\n Computing closure amplitudes.\n'
+            print('\n Computing closure amplitudes.\n')
             totiter = len(quads)
 
         nprint = totiter*np.linspace(0, 1, 10)
@@ -438,8 +433,8 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                             Nread[pp][k] += 1
                         for j in range(len(averclos[pp, :])):
                             if type(averclos[pp, j]) is np.float64:
-                                print >> output, outformat % tuple(
-                                    [pol, j]+NA+[averclos[pp, j], avererr[pp, j]])
+                                print(outformat % tuple(
+                                    [pol, j]+NA+[averclos[pp, j], avererr[pp, j]]), file=output)
                         if plot:
                             sub.plot(xaxplot[:x1], averclos[pp,
                                                             :], Polsymb[pp], label=pol)
@@ -461,7 +456,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
 
     ukind = {'phase': '(deg.)', 'amplitude': '(norm.)'}[kind]
     if histogram:
-        print '\n\n Generating histograms'
+        print('\n\n Generating histograms')
         histo = np.zeros((x1, xxlim[1]))
         averhisto = np.zeros((len(parhand), len(numant), xxlim[1]))
         if kind == 'phase':
@@ -512,10 +507,10 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         for ant in numant:
             stds[ant] += np.std(ClosStats[ant][pp, :Nread[pp][ant], :])
 
-    print '\n\n---------------------'
-    print 'Based on closure statistics, the antennas ordered from BEST to WORSE are:\n'
+    print('\n\n---------------------')
+    print('Based on closure statistics, the antennas ordered from BEST to WORSE are:\n')
     for i in np.argsort(stds):
         if stds[i] > 0.0:
-            print '%s   -- with std. of %.3e %s' % (nants[i], stds[i], ukind)
+            print('%s   -- with std. of %.3e %s' % (nants[i], stds[i], ukind))
 
-    print '---------------------\n'
+    print('---------------------\n')
