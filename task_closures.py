@@ -50,7 +50,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
     try:
         xlims[0] = int(xlims[0])
         xlims[1] = int(xlims[1])
-    except:
+    except Exception:
         print 'Bad xlims. Should be a list of two integers. Setting it to its default: [0,0]'
         xlims = [0, 0]
 
@@ -138,14 +138,14 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
     # Get either the scan number or the source/timerange pair:
     try:
         scan = int(scan)
-    except:
+    except Exception:
         print 'scan must be an integer. Aborting!'
         return False
 
     if type(field) is str:
         try:
             field = int(field)
-        except:
+        except Exception:
             pass
 
     if type(timerange) is not str:
@@ -194,7 +194,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                 sid = sournames.index(field)
                 sdic['field_id'] = sid
                 print 'Selected field '+field+', with id number', sid
-            except:
+            except Exception:
                 print 'Field '+field+' is not found in the data!'
                 print 'Valid fields are: ', sournames
                 print 'Will try to take the data based on timerange (or just take the first scan).'
@@ -212,7 +212,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                 t2 = qa.getvalue(qa.convert(qa.quantity(timerang[1]), 's'))
                 timer = [t1[0], t2[0]]
                 sdic['time'] = timer
-            except:
+            except Exception:
                 print 'Bad format in timerange string. Will take the source\'s first scan.'
                 notsel = True
         else:

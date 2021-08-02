@@ -20,7 +20,7 @@ def from_CASA_syntax(list0, totlist, whatami, default):
             colind = list0.index(':')
             try:
                 mypsw = int(list0[:colind])
-            except:
+            except Exception:
                 print 'Bad spw syntax!'
                 return 0, 0, False
             chran = list0[colind+1:].split('~')
@@ -30,7 +30,7 @@ def from_CASA_syntax(list0, totlist, whatami, default):
                     ch1 = int(chran[1])+1
                 else:
                     ch1 = ch0+1
-            except:
+            except Exception:
                 print 'Bad spw syntax!'
                 return 0, 0, False
             if ch0 < totlist[1][myspw] and ch1 < totlist[1][myspw] and ch0 < ch1:
@@ -42,7 +42,7 @@ def from_CASA_syntax(list0, totlist, whatami, default):
         else:
             try:
                 myspw = int(list0)
-            except:
+            except Exception:
                 print 'Bad spw syntax!'
                 return 0, 0, False
             return myspw, [0, totlist[1][myspw]], True
@@ -54,7 +54,7 @@ def from_CASA_syntax(list0, totlist, whatami, default):
             indices = [totlist.index(elem) for elem in list0]
             list1 = [totlist[index] for index in indices]  # Assign elements.
             return list1, True
-        except:
+        except Exception:
             print 'Bad antenna list! Check that all antennas are in the MS!'
             return 0, False
 
@@ -90,8 +90,8 @@ def ClosComp(CDATA, MDATA, SelBas, baselines, q):
         if phase:  # closure phases (1 closure per triplet)
 
             BisPecX = Xvis[0]*Xvis[1]*np.conjugate(Xvis[2])
-            BisPecX *= np.conjugate(XvisMod[0] *
-                                    XvisMod[1]*np.conjugate(XvisMod[2]))
+            BisPecX *= np.conjugate(XvisMod[0]
+                                    * XvisMod[1]*np.conjugate(XvisMod[2]))
             return [[180./np.pi*np.arctan2(np.imag(BisPecX), np.real(BisPecX))], [b]]
 
         else:  # closure amplitudes (3 closures per quadruplet)
@@ -106,9 +106,8 @@ def ClosComp(CDATA, MDATA, SelBas, baselines, q):
             ClosModX2 = AbsInt[2]*AbsInt[3]/(AbsInt[4]*AbsInt[5])
             ClosModX3 = ClosModX1/ClosModX2
 
-######################
-# Compute the closure-amplitude residuals
-# (define closures such that the residuals are >=0.0, on average):
+            # Compute the closure-amplitude residuals
+            # (define closures such that the residuals are >=0.0, on average):
 
             ClosRat1 = ClosModX1/ClosX1
             ClosRat2 = ClosModX2/ClosX2
