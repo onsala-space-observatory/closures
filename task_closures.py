@@ -35,7 +35,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         cols += ['model_data']
 
     if do_model and column == 'model':
-        print '\n It has no sense to plot model minus model! Aborting!'
+        print '\n It makes no sense to plot model minus model! Aborting!'
         return False
 
     sdic = {}
@@ -68,9 +68,8 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         print '\n\n   Unkown "kind" parameter. Valid values are "phase" or "amplitude"\n'
         return False
 
-#############################
-# Get names of sources and antennas/stations:
-# Get also range of spws:
+    # Get names of sources and antennas/stations:
+    # Get also range of spws:
     tb.open(os.path.join(vis, 'FIELD'))
     sournames = list(tb.getcol('NAME'))
     tb.close()
@@ -98,7 +97,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         return False
 
 
-# Generate lists of all baselines and antennas:
+    # Generate lists of all baselines and antennas:
     baselines = []
 
     if not os.path.exists(outdir):
@@ -178,7 +177,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
             mysource = ms.getdata(['field_id'])['field_id'][0]
             print 'This scan is an observation of source: '+sournames[mysource]
 
-# If the scan number is not set, get the source id...:
+    # If the scan number is not set, get the source id...:
     else:
         nofield = False
         if type(field) is int and field > -1:
@@ -204,7 +203,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
             print 'Will guess source id from the timerange, if possible.'
             nofield = True
 
-# ...and/or get the timerange:
+        # ...and/or get the timerange:
         notsel = False
         if len(timerang) > 0:
             try:
@@ -232,20 +231,17 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                     sournames[mysource]
 
 
-####################################
-
     ms.close()
 
 
-# Generate lists of all the antennas, baselines, triplets, ...
-
+    # Generate lists of all the antennas, baselines, triplets, ...
     baselines = [list(bl) for bl in cb(nants, 2)]
     triplets = [list(tr) for tr in cb(nants, 3)]
     quads = [list(qd) for qd in cb(nants, 4)]
 
 
-# Select only triplets/quads with, at least, the antennas
-# in the list of required antennas (if any)
+    # Select only triplets/quads with, at least, the antennas
+    # in the list of required antennas (if any)
     if len(antennas) > 0:
         def filtant(x):
             if len(filter(lambda v: v in antennas, x)) == min(len(x), len(antennas)):
@@ -257,9 +253,6 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
 
     Ncombs1 = [len(filter(lambda v: a in v, triplets)) for a in nants]
     Ncombs2 = [len(filter(lambda v: a in v, quads)) for a in nants]
-
-# print Ncombs1
-# print Ncombs2
 
     if plot or histogram:
         fig = pl.figure()
@@ -274,10 +267,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
     print >> output, head
     outformat = out1 + "   % .11e  % .11e"
 
-
-######################################
-# Get the data (average over time for each baseline):
-
+    # Get the data (average over time for each baseline):
     if True:
 
         ms.open(vis)
@@ -286,13 +276,13 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         print '\nGetting data and averaging.'
 
         tempsel = ms.select(items=sdic)
-    # print sdic
+        # print sdic
         temp1 = ms.getdata(cols, ifraxis=True, average=False)
         if not tempsel or len(temp1[column]) == 0:
             print 'NO VALID DATA FOR SPW #', sp
             return False
 
-# Get the polarization labels:
+        # Get the polarization labels:
         Pols = list(temp1['axis_info']['corr_axis'])
         Polsymb = ['or', 'ok', 'og', 'ob']
 
@@ -323,7 +313,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         else:
             MDATA = 1.0
 
-# Output file:
+        # Output file:
         outxax = {'frequency': 'frequencies.dat',
                   'time': 'juliandates.dat'}[xaxis]
         output2 = open(os.path.join(outdir, outxax), 'w')
@@ -354,15 +344,13 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         output2.close()
 
 
-# Generate list of antennas and baselines for this scan:
+        # Generate list of antennas and baselines for this scan:
         ANTS = temp1['axis_info']['ifr_axis']['ifr_name']
         BASS = [ANT.split('-') for ANT in ANTS]
 
         ms.close()
-#############################################
 
-######################################
-# Determine baseline ids for the data rows:
+        # Determine baseline ids for the data rows:
         SelBas = []
         for bas in baselines:
             row = filter(lambda x: (bas[0] in x) and (bas[1] in x), BASS)
@@ -370,12 +358,8 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                 SelBas.append(-1)  # No data for this baseline
             else:
                 SelBas.append(BASS.index(row[0]))
-########################################
 
-
-####################################################
-# Compute all closures:
-
+        # Compute all closures:
         if kind == 'phase':
             print '\n Computing closure phases.\n'
             totiter = len(triplets)
@@ -386,8 +370,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         nprint = totiter*np.linspace(0, 1, 10)
         pdone = 0
 
-#  print triplets
-
+        #  print triplets
         for i in range(totiter):
 
             done = 10*np.sum(i > nprint)
@@ -396,18 +379,17 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                 sys.stdout.flush()
                 pdone = done
 
-# Set of antennas for current closure:
+            # Set of antennas for current closure:
             if kind == 'amplitude':
                 q = quads[i]
             elif kind == 'phase':
                 q = triplets[i]
 
-# Compute closure:
+            # Compute closure:
             ClosX, NB = ClosComp(CDATA, MDATA, SelBas, baselines, q)
             NA = [nants.index(ant) for ant in q]
 
-###############################
-# Update vectors of overall statistics:
+            # Update vectors of overall statistics:
             # Otherwise, ClosX[0]=False, and there is no data.
             if type(ClosX[0]) is np.ma.core.MaskedArray:
                 #  print len(ClosX), NB[0]
