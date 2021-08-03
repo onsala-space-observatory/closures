@@ -1,4 +1,4 @@
-from auxclos import from_CASA_syntax, ClosComp
+from .auxclos import from_CASA_syntax, ClosComp
 import inspect
 from itertools import combinations as cb
 import numpy as np
@@ -33,7 +33,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         cols += ['model_data']
 
     if do_model and column == 'model':
-        print('\n It has no sense to plot model minus model! Aborting!')
+        print('It has no sense to plot model minus model! Aborting!')
         return False
 
     sdic = {}
@@ -63,12 +63,11 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         xxlim[1] = xlims[1]
 
     if kind not in ['phase', 'amplitude']:
-        print('\n\n   Unkown "kind" parameter. Valid values are "phase" or "amplitude"\n')
+        print('Unkown "kind" parameter. Valid values are "phase" or "amplitude"')
         return False
 
-#############################
-# Get names of sources and antennas/stations:
-# Get also range of spws:
+    # Get names of sources and antennas/stations:
+    # Get also range of spws:
     tb.open(os.path.join(vis, 'FIELD'))
     sournames = list(tb.getcol('NAME'))
     tb.close()
@@ -92,11 +91,11 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
     antennas, success2 = from_CASA_syntax(antennas, nants, 'antenna', [])
 
     if not (success and success2):
-        print('\n Check spw and antennas. Aborting!')
+        print('Check spw and antennas. Aborting!')
         return False
 
 
-# Generate lists of all baselines and antennas:
+    # Generate lists of all baselines and antennas:
     baselines = []
 
     if not os.path.exists(outdir):
@@ -127,7 +126,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
 
     antlist.close()
 
-    print('\nOpening dataset.')
+    print('Opening dataset.')
     if not ms.open(vis):
         print("Bad measurement set!")
         return False
@@ -136,7 +135,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
     try:
         scan = int(scan)
     except Exception:
-        print('scan must be an integer. Aborting!')
+        print('"scan" must be an integer. Aborting!')
         return False
 
     if type(field) is str:
@@ -146,7 +145,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
             pass
 
     if type(timerange) is not str:
-        print('\'timerange\' must be a string. Aborting!')
+        print('"timerange" must be a string. Aborting!')
         return False
 
     if len(timerange) == 0:
@@ -154,11 +153,11 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
     else:
         timerang = timerange.split('~')
         if len(timerang) != 2:
-            print('\'timerange\' is not formatted as a time range (i.e., like \'t0~t1\'). Aborting!')
+            print('"timerange" is not formatted as a time range (i.e., like "t0~t1"). Aborting!')
             return False
 
     if (type(antennas) is not list):
-        print('\'antennas\' must be a list of strings. Aborting!')
+        print('"antennas" must be a list of strings. Aborting!')
         return False
 
     if scan >= 0:
@@ -175,12 +174,12 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
             mysource = ms.getdata(['field_id'])['field_id'][0]
             print('This scan is an observation of source: '+sournames[mysource])
 
-# If the scan number is not set, get the source id...:
+    # If the scan number is not set, get the source id...:
     else:
         nofield = False
         if type(field) is int and field > -1:
             if field > len(sournames)-1:
-                print('\'field\' parameter is larger than number of fields: ', len(sournames))
+                print('"field" parameter is larger than number of fields: ', len(sournames))
                 return False
             else:
                 sdic['field_id'] = field
@@ -200,7 +199,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
             print('Will guess source id from the timerange, if possible.')
             nofield = True
 
-# ...and/or get the timerange:
+        # ...and/or get the timerange:
         notsel = False
         if len(timerang) > 0:
             try:
@@ -209,7 +208,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                 timer = [t1[0], t2[0]]
                 sdic['time'] = timer
             except Exception:
-                print('Bad format in timerange string. Will take the source\'s first scan.')
+                print("Bad format in timerange string. Will take the source's first scan.")
                 notsel = True
         else:
             notsel = True
@@ -226,35 +225,26 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                 mysource = ms.getdata(['field_id'])['field_id'][0]
                 print('This scan is an observation of source: ' + sournames[mysource])
 
-
-####################################
-
     ms.close()
 
-
-# Generate lists of all the antennas, baselines, triplets, ...
-
+    # Generate lists of all the antennas, baselines, triplets, ...
     baselines = [list(bl) for bl in cb(nants, 2)]
     triplets = [list(tr) for tr in cb(nants, 3)]
     quads = [list(qd) for qd in cb(nants, 4)]
 
-
-# Select only triplets/quads with, at least, the antennas
-# in the list of required antennas (if any)
+    # Select only triplets/quads with, at least, the antennas
+    # in the list of required antennas (if any)
     if len(antennas) > 0:
         def filtant(x):
-            if len(filter(lambda v: v in antennas, x)) == min(len(x), len(antennas)):
+            if len(list(filter(lambda v: v in antennas, x))) == min(len(x), len(antennas)):
                 return True
             else:
                 return False
-        triplets = filter(filtant, triplets)
-        quads = filter(filtant, quads)
+        triplets = list(filter(filtant, triplets))
+        quads = list(filter(filtant, quads))
 
-    Ncombs1 = [len(filter(lambda v: a in v, triplets)) for a in nants]
-    Ncombs2 = [len(filter(lambda v: a in v, quads)) for a in nants]
-
-# print Ncombs1
-# print Ncombs2
+    Ncombs1 = [len(list(filter(lambda v: a in v, triplets))) for a in nants]
+    Ncombs2 = [len(list(filter(lambda v: a in v, quads))) for a in nants]
 
     if plot or histogram:
         fig = pl.figure()
@@ -269,25 +259,20 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
     print(head, file=output)
     outformat = out1 + "   % .11e  % .11e"
 
-
-######################################
-# Get the data (average over time for each baseline):
-
+    # Get the data (average over time for each baseline):
     if True:
 
         ms.open(vis)
         ms.selectinit(datadescid=sp)
 
-        print('\nGetting data and averaging.')
-
+        print('Getting data and averaging.')
         tempsel = ms.select(items=sdic)
-    # print(sdic)
         temp1 = ms.getdata(cols, ifraxis=True, average=False)
         if not tempsel or len(temp1[column]) == 0:
             print('NO VALID DATA FOR SPW #', sp)
             return False
 
-# Get the polarization labels:
+        # Get the polarization labels:
         Pols = list(temp1['axis_info']['corr_axis'])
         Polsymb = ['or', 'ok', 'og', 'ob']
 
@@ -318,9 +303,8 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         else:
             MDATA = 1.0
 
-# Output file:
-        outxax = {'frequency': 'frequencies.dat',
-                  'time': 'juliandates.dat'}[xaxis]
+        # Output file:
+        outxax = {'frequency': 'frequencies.dat', 'time': 'juliandates.dat'}[xaxis]
         output2 = open(os.path.join(outdir, outxax), 'w')
         xaxtxt = {'frequency': 'Freq. (GHz)', 'time': 'MJD (days)'}[xaxis]
         yaxtxt = {'phase': 'Phas Clos (deg.)  Error (deg.)', 'amplitude': 'Amp Clos   Error'}[
@@ -343,45 +327,36 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         print('! Index    '+xlabel, file=output2)
         for i, xi in enumerate(xaxplot):
             print('%5i  %.11e' % (i, xi), file=output2)
-
         output2.close()
 
-
-# Generate list of antennas and baselines for this scan:
+        # Generate list of antennas and baselines for this scan:
         ANTS = temp1['axis_info']['ifr_axis']['ifr_name']
         BASS = [ANT.split('-') for ANT in ANTS]
 
         ms.close()
-#############################################
 
-######################################
-# Determine baseline ids for the data rows:
+        # Determine baseline ids for the data rows:
         SelBas = []
         for bas in baselines:
-            row = filter(lambda x: (bas[0] in x) and (bas[1] in x), BASS)
+            row = list(filter(lambda x: (bas[0] in x) and (bas[1] in x), BASS))
             if len(row) == 0:
                 SelBas.append(-1)  # No data for this baseline
             else:
                 SelBas.append(BASS.index(row[0]))
-########################################
 
-
-####################################################
-# Compute all closures:
-
+        # Compute all closures:
         if kind == 'phase':
-            print('\n Computing closure phases.\n')
             totiter = len(triplets)
+            print("Computing closure phases over %d triplets." % (totiter))
         else:
-            print('\n Computing closure amplitudes.\n')
             totiter = len(quads)
+            print("Computing closure amplitudes over %d quads." % (totiter))
 
         nprint = totiter*np.linspace(0, 1, 10)
         pdone = 0
 
         #  print triplets
         for i in range(totiter):
-
             done = 10*np.sum(i > nprint)
             if done > pdone:
                 sys.stdout.write('\r '+str(done)+'%')
@@ -401,7 +376,6 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
             # Update vectors of overall statistics:
             # Otherwise, ClosX[0]=False, and there is no data.
             if type(ClosX[0]) is np.ma.core.MaskedArray:
-                #  print len(ClosX), NB[0]
                 for nb in range(len(ClosX)):
                     #  for bas in NB[nb]:
                     antxt = '-'.join([nants[k] for k in NA])
@@ -423,9 +397,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                     for pp, pol in enumerate(Pols):
                         x1 = np.shape(averclos[pp, :])[0]
                         for k in NA:
-                            # print 'hola 0 ',k,pp,NA,np.shape(ClosStats[k]), Nread[pp][k]
-                            ClosStats[k][pp, Nread[pp][k],
-                                         :x1] = averclos[pp, :]
+                            ClosStats[k][pp, Nread[pp][k], :x1] = averclos[pp, :]
                             Nread[pp][k] += 1
                         for j in range(len(averclos[pp, :])):
                             if type(averclos[pp, j]) is np.float64:
@@ -452,7 +424,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
 
     ukind = {'phase': '(deg.)', 'amplitude': '(norm.)'}[kind]
     if histogram:
-        print('\n\n Generating histograms')
+        print('Generating histograms')
         histo = np.zeros((x1, xxlim[1]))
         averhisto = np.zeros((len(parhand), len(numant), xxlim[1]))
         if kind == 'phase':
@@ -503,10 +475,10 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         for ant in numant:
             stds[ant] += np.std(ClosStats[ant][pp, :Nread[pp][ant], :])
 
-    print('\n\n---------------------')
+    print('\n---------------------')
     print('Based on closure statistics, the antennas ordered from BEST to WORSE are:\n')
     for i in np.argsort(stds):
         if stds[i] > 0.0:
             print('%s   -- with std. of %.3e %s' % (nants[i], stds[i], ukind))
 
-    print('---------------------\n')
+    print('---------------------')

@@ -75,7 +75,7 @@ def ClosComp(CDATA, MDATA, SelBas, baselines, q):
     irows = [SelBas[bi] for bi in b]  # Row numbers for the required baselines.
 
     # One or more baselines are missing.
-    if len(filter(lambda x: x < 0, irows)) > 0:
+    if len(list(filter(lambda x: x < 0, irows))) > 0:
         return [[False], []]   # Returns a null result.
 
     else:  # All baselines have data.
@@ -106,10 +106,8 @@ def ClosComp(CDATA, MDATA, SelBas, baselines, q):
             ClosModX2 = AbsInt[2]*AbsInt[3]/(AbsInt[4]*AbsInt[5])
             ClosModX3 = ClosModX1/ClosModX2
 
-######################
-# Compute the closure-amplitude residuals
-# (define closures such that the residuals are >=0.0, on average):
-
+            # Compute the closure-amplitude residuals
+            # (define closures such that the residuals are >=0.0, on average):
             ClosRat1 = ClosModX1/ClosX1
             ClosRat2 = ClosModX2/ClosX2
             ClosRat3 = ClosModX3/ClosX3
