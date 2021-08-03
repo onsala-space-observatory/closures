@@ -1,16 +1,16 @@
-from auxclos import *
+from auxclos import from_CASA_syntax, ClosComp
 import inspect
-from taskinit import *
 from itertools import combinations as cb
 import numpy as np
 import pylab as pl
 import os
 import sys
-import gc
-import pickle
 import time
-tb = gentools(['tb'])[0]
-ms = gentools(['ms'])[0]
+import casatools
+
+ms = casatools.ms()
+tb = casatools.table()
+qa = casatools.quanta()
 
 # Load auxiliary functions:
 libloc = inspect.stack()[0][1]
@@ -20,8 +20,6 @@ sys.path.append(os.path.dirname(libloc))
 def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1', spw='0',
              scan=-1, timerange='', antennas=[], do_model=False, plot=False,
              histogram=False, outdir='closures.results', xlims=[0, 0]):
-
-    tic = time.time()
 
     # Set the dictionary to select the data:
     if column not in ['data', 'corrected_data', 'corrected', 'model']:
@@ -50,7 +48,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
     try:
         xlims[0] = int(xlims[0])
         xlims[1] = int(xlims[1])
-    except:
+    except Exception:
         print('Bad xlims. Should be a list of two integers. Setting it to its default: [0,0]')
         xlims = [0, 0]
 
@@ -137,14 +135,14 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
     # Get either the scan number or the source/timerange pair:
     try:
         scan = int(scan)
-    except:
+    except Exception:
         print('scan must be an integer. Aborting!')
         return False
 
     if type(field) is str:
         try:
             field = int(field)
-        except:
+        except Exception:
             pass
 
     if type(timerange) is not str:
@@ -192,7 +190,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                 sid = sournames.index(field)
                 sdic['field_id'] = sid
                 print('Selected field '+field+', with id number', sid)
-            except:
+            except Exception:
                 print('Field '+field+' is not found in the data!')
                 print('Valid fields are: ', sournames)
                 print('Will try to take the data based on timerange (or just take the first scan).')
@@ -210,7 +208,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                 t2 = qa.getvalue(qa.convert(qa.quantity(timerang[1]), 's'))
                 timer = [t1[0], t2[0]]
                 sdic['time'] = timer
-            except:
+            except Exception:
                 print('Bad format in timerange string. Will take the source\'s first scan.')
                 notsel = True
         else:
@@ -381,8 +379,7 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
         nprint = totiter*np.linspace(0, 1, 10)
         pdone = 0
 
-#  print triplets
-
+        #  print triplets
         for i in range(totiter):
 
             done = 10*np.sum(i > nprint)
@@ -391,18 +388,17 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                 sys.stdout.flush()
                 pdone = done
 
-# Set of antennas for current closure:
+            # Set of antennas for current closure:
             if kind == 'amplitude':
                 q = quads[i]
             elif kind == 'phase':
                 q = triplets[i]
 
-# Compute closure:
+            # Compute closure:
             ClosX, NB = ClosComp(CDATA, MDATA, SelBas, baselines, q)
             NA = [nants.index(ant) for ant in q]
 
-###############################
-# Update vectors of overall statistics:
+            # Update vectors of overall statistics:
             # Otherwise, ClosX[0]=False, and there is no data.
             if type(ClosX[0]) is np.ma.core.MaskedArray:
                 #  print len(ClosX), NB[0]
