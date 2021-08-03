@@ -1,10 +1,23 @@
 import sys
 import os
 
+import casatools
+from casatasks import simobserve
+from casatasks import clearcal
+from casatasks import tclean
+
+mydir = os.getenv("HOME") + "/ARC"
+sys.path.insert(0, mydir)
+from closures.gotasks.closures import closures
+
 vis = "Disc/Disc.alma.out10.noisy.ms"
 antennas = ["A00"]
 
 if not os.path.isdir(vis):
+    cl = casatools.componentlist()
+    ia = casatools.image()
+    qa = casatools.quanta()
+
     # start by simulating an image of a disc
     # Array to use:
     arrayconfig = 'alma.out10.cfg'
