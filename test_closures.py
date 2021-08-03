@@ -56,4 +56,5 @@ if not os.path.isdir(vis):
 
 # now load and run closures with all default parameters, except image name
 print(vis)
+print(antennas)
 closures()
