@@ -1,77 +1,77 @@
-<casaxml xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd file:///opt/casa/code/xmlcasa/xml/casa.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://casa.nrao.edu/schema/psetTypes.html">
+<casaxml xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd file:///opt/casa/code/xmlcasa/xml/casa.xsd" xmlns="http://casa.nrao.edu/schema/psetTypes.html" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <task category="analysis" name="closures" type="function">
+  <task type="function" name="closures" category="analysis">
     <shortdescription>Plots closure phases (or amplitudes) vs. time or frequency.</shortdescription>
     <description>Plots closure phases (or amplitudes) vs. time or frequency, for selected antenna triplets (or quads), frequency range, and/or time range. It also saves results in ascii files, for plotting with other softwares.
     </description>
 
     <input>
-      <param mustexist="false" name="vis" type="path">
+      <param type="path" name="vis" mustexist="false">
 	<description>Input measurement set.</description>
 	<value/>
       </param>
 
-      <param mustexist="false" name="kind" type="path">
+      <param type="path" name="kind" mustexist="false">
 	<description>The kind of closure to compute. Can be either \'amplitude\' or \'phase\'.</description>
 	<value>phase</value>
       </param>
 
-      <param mustexist="false" name="xaxis" type="path">
+      <param type="path" name="xaxis" mustexist="false">
 	<description>The quantity to compute (and plot) the closures against of. It can be either \'frequency\' or \'time\'.</description>
 	<value>frequency</value>
       </param>
 
-      <param mustexist="false" name="column" type="path">
+      <param type="path" name="column" mustexist="false">
 	<description>Data column to use. Can be either \'data\', \'corrected\', or \'model\'. It must exist in the measurement set.</description>
 	<value>data</value>
       </param>
 
-      <param mustexist="false" name="field" type="path">
+      <param type="path" name="field" mustexist="false">
 	<description>field id (or field name) of the selected source. If the source is observed in mosaic mode, the first pointing will be taken. If field = -1, the first source observed in the ms will be taken.</description>
 	<value>-1</value>
       </param>
 
-      <param mustexist="false" name="spw" type="path">
+      <param type="path" name="spw" mustexist="false">
 	<description>Spectral window and channel range to use. Only one spectral window at  a time is allowed (e.g., \'1:50~100\' selects channels from 50 to 100 in spw number 1).</description>
 	<value>0</value>
       </param>
 
-      <param mustexist="false" name="scan" type="int">
+      <param type="int" name="scan" mustexist="false">
 	<description>If not negative, scan number to take for computing the closures. It overrides the \'field\' parameter.</description>
 	<value>-1</value>
       </param>
 
-      <param mustexist="false" name="timerange" type="path">
+      <param type="path" name="timerange" mustexist="false">
 	<description>A string representing the timerange (in CASA syntax) for the data to be selected. E.g.: \'2010/09/10/09:05:00~2010/09/10/09:10:00\'. It overrides the \'scan\' parameter, but not the \'field\' parameter.</description>
 	<value/>
       </param>
 
-      <param mustexist="false" name="antennas" type="any">
+      <param type="any" name="antennas" mustexist="false">
 	<description>List of names of the antennas that *should* appear in all the computed closures. If empty, all possible closures will be computed. E.g.: antennas=[\'DV08\'] will compute all closures where antenna DV08 appears.</description>
 	<value>[]</value>
       </param>
 
-      <param mustexist="false" name="do_model" type="bool">
+      <param type="bool" name="do_model" mustexist="false">
 	<description>boolean. Whether to subtract the model from the data closures. If true, the closures will correspond to the *residual* visibilities (i.e., observations minus model). Of course, this makes no sense if column is set to \'model\'!</description>
 	<value>False</value>
       </param>
 
-      <param mustexist="false" name="plot" type="bool">
+      <param type="bool" name="plot" mustexist="false">
 	<description>Whether to make plots of closures versus frequency/time (for each triplet/quadruplet of antennas) or only compute and save these closures in an external ascii file (to be plotted later by the user with another program).</description>
 	<value>False</value>
       </param>
 
-      <param mustexist="false" name="histogram" type="bool">
+      <param type="bool" name="histogram" mustexist="false">
 	<description>Whether to compute antenna-based closure histograms. This may be useful to look for very bad (or good!) antennas, based on their closures.</description>
 	<value>False</value>
       </param>
 
-      <param mustexist="false" name="outdir" type="path">
+      <param type="path" name="outdir" mustexist="false">
 	<description>Name of the directory where all output files will be written.</description>
 	<value>closures.results</value>
       </param>
 
-      <param mustexist="false" name="xlims" type="any">
+      <param type="any" name="xlims" mustexist="false">
 	<description>Maximum closure to plot (degrees for phase, percentage for amplitude) and number of bins for the histograms. E.g.: [45,100], for kind=\'phase\', would plot phase closures up to 45 degrees, and histograms with 100 bins. If lower or equal than 0, the default is taken: 180 degrees and 10% (for phase and amplitude, respectively) and histograms with 50 bins.</description>
 	<value>[0,0]</value>
       </param>
