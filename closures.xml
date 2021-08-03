@@ -21,17 +21,17 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
       </param>
 
       <param type="string" name="kind" mustexist="false">
-	<description>The kind of closure to compute. Can be either \'amplitude\' or \'phase\'.</description>
+	<description>The kind of closure to compute. Can be either "amplitude" or "phase".</description>
 	<value>phase</value>
       </param>
 
       <param type="string" name="xaxis" mustexist="false">
-	<description>The quantity to compute (and plot) the closures against of. It can be either \'frequency\' or \'time\'.</description>
+	<description>The quantity to compute (and plot) the closures against of. It can be either "frequency" or "time".</description>
 	<value>frequency</value>
       </param>
 
       <param type="string" name="column" mustexist="false">
-	<description>Data column to use. Can be either \'data\', \'corrected\', or \'model\'. It must exist in the measurement set.</description>
+	<description>Data column to use. Can be either "data", "corrected", or "model". It must exist in the measurement set.</description>
 	<value>data</value>
       </param>
 
@@ -41,27 +41,27 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
       </param>
 
       <param type="string" name="spw" mustexist="false">
-	<description>Spectral window and channel range to use. Only one spectral window at  a time is allowed (e.g., \'1:50~100\' selects channels from 50 to 100 in spw number 1).</description>
+	<description>Spectral window and channel range to use. Only one spectral window at  a time is allowed (e.g., "1:50~100" selects channels from 50 to 100 in spw number 1).</description>
 	<value>0</value>
       </param>
 
       <param type="int" name="scan" mustexist="false">
-	<description>If not negative, scan number to take for computing the closures. It overrides the \'field\' parameter.</description>
+	<description>If not negative, scan number to take for computing the closures. It overrides the "field" parameter.</description>
 	<value>-1</value>
       </param>
 
       <param type="string" name="timerange" mustexist="false">
-	<description>A string representing the timerange (in CASA syntax) for the data to be selected. E.g.: \'2010/09/10/09:05:00~2010/09/10/09:10:00\'. It overrides the \'scan\' parameter, but not the \'field\' parameter.</description>
+	<description>A string representing the timerange (in CASA syntax) for the data to be selected. E.g.: "2010/09/10/09:05:00~2010/09/10/09:10:00". It overrides the "scan" parameter, but not the "field" parameter.</description>
 	<value></value>
       </param>
 
       <param type="any" name="antennas" mustexist="false">
-	<description>List of names of the antennas that *should* appear in all the computed closures. If empty, all possible closures will be computed. E.g.: antennas=[\'DV08\'] will compute all closures where antenna DV08 appears.</description>
+	<description>List of names of the antennas that *should* appear in all the computed closures. If empty, all possible closures will be computed. E.g.: antennas=["DV08"] will compute all closures where antenna DV08 appears.</description>
 	<value>[]</value>
       </param>
 
       <param type="boolean" name="do_model" mustexist="false">
-	<description>boolean. Whether to subtract the model from the data closures. If true, the closures will correspond to the *residual* visibilities (i.e., observations minus model). Of course, this makes no sense if column is set to \'model\'!</description>
+	<description>boolean. Whether to subtract the model from the data closures. If true, the closures will correspond to the *residual* visibilities (i.e., observations minus model). Of course, this makes no sense if column is set to "model"!</description>
 	<value>False</value>
       </param>
 
@@ -81,7 +81,7 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
       </param>
 
       <param type="any" name="xlims" mustexist="false">
-	<description>Maximum closure to plot (degrees for phase, percentage for amplitude) and number of bins for the histograms. E.g.: [45,100], for kind=\'phase\', would plot phase closures up to 45 degrees, and histograms with 100 bins. If lower or equal than 0, the default is taken: 180 degrees and 10% (for phase and amplitude, respectively) and histograms with 50 bins.</description>
+	<description>Maximum closure to plot (degrees for phase, percentage for amplitude) and number of bins for the histograms. E.g.: [45,100], for kind="phase", would plot phase closures up to 45 degrees, and histograms with 100 bins. If lower or equal than 0, the default is taken: 180 degrees and 10% (for phase and amplitude, respectively) and histograms with 50 bins.</description>
 	<value>[0,0]</value>
       </param>
 
@@ -111,31 +111,31 @@ do NOT depend on neither bandpass nor fringe-rate effects!
 If the average is done in frequency, then the closures can be plotted as
 a function of time, and viceversa. Which quantities are used in the averaging
 and plotting depend on the value of the xaxis parameter. The default is
-xaxis = \'frequency\', so the closures are averaged in time and returned
+xaxis = "frequency", so the closures are averaged in time and returned
 by the task as a function of frequency.
 
 The ASCII files generated by this task are:
 
-\'antennas.dat\' -> where the antenna names and their indices are saved.
+"antennas.dat" -> where the antenna names and their indices are saved.
 
-\'frequencies.dat\' -> If xaxis=\'frequency\', all the frequencies, and
+"frequencies.dat" -> If xaxis="frequency", all the frequencies, and
                        their channel indices, will be saved here.
 
-\'juliandates.dat\' -> If xaxis=\'time\', the Modified Julian Dates, and
+"juliandates.dat" -> If xaxis="time", the Modified Julian Dates, and
                        their time indices, will be saved here.
 
-\'*.closures.dat\' -> All closures will be saved here, in rows with several
+"*.closures.dat" -> All closures will be saved here, in rows with several
                       columns. The quantities for each column are:
 
   Col. 1: POLARIZATION (e.g., XX, YY, RR, or LL)
 
   Col. 2: FREQ. OR TIME INDEX  (from these indices, the user can get
           the actual values of frequencies and times, looking at the files
-          \'frequencies.dat\' and \'juliandates.dat\'
+          "frequencies.dat" and "juliandates.dat"
 
   Col. 3-5(6): ANTENNA INDICES: indices of the antennas involved in the
                triplet (or quadruplet) of the closure. The actual antenna
-               names can be taken from the file \'antennas.dat\'
+               names can be taken from the file "antennas.dat"
 
   Col. 6-7 (or 7-8):  CLOSURE AND CLOSURE ERROR
 
@@ -143,7 +143,7 @@ The ASCII files generated by this task are:
 If plot=True, the task will generate plots of all these data and save
 them as EPS files (one file per triplet/quadruplet of antennas) in a
 subdirectory called "plots". Notice that if the number of antennas is
-large (and the \'antennas\' parameter is set to [], so all closures
+large (and the "antennas" parameter is set to [], so all closures
 are computed) the number of these plots can be HUGE (from hundreds
 to thousands!).
 
