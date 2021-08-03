@@ -12,6 +12,7 @@ from closures.gotasks.closures import closures
 
 vis = "Disc/Disc.alma.out10.noisy.ms"
 antennas = ["A00"]
+xlims = [0, 0]
 
 if not os.path.isdir(vis):
     cl = casatools.componentlist()
@@ -70,4 +71,5 @@ if not os.path.isdir(vis):
 # now load and run closures with all default parameters, except image name
 print(vis)
 print(antennas)
+print(xlims)
 closures()
