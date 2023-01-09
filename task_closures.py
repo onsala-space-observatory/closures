@@ -304,12 +304,12 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
 
         print 'Arranging data.'
 
-        CDATA = np.ma.array(temp1[column][parhand, chans[0]:chans[1], :],
-                            mask=temp1['flag'][parhand, chans[0]:chans[1], :])
+        CDATA = np.ma.array(temp1[column][:, chans[0]:chans[1], :],
+                            mask=temp1['flag'][:, chans[0]:chans[1], :])
         CTIME = temp1['time']
         if do_model:
-            MDATA = np.ma.array(temp1['model_data'][parhand, chans[0]:chans[1], :],
-                                mask=temp1['flag'][parhand, chans[0]:chans[1], :])
+            MDATA = np.ma.array(temp1['model_data'][:, chans[0]:chans[1], :],
+                                mask=temp1['flag'][:, chans[0]:chans[1], :])
         else:
             MDATA = 1.0
 
@@ -411,17 +411,17 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                         avererr = np.sqrt(np.average(
                             np.power(ClosX[nb]-averclos[:, np.newaxis, :], 2.), axis=1)/nelem)
 
-                    for pp, pol in enumerate(Pols):
+                    for pi, pp in enumerate(parhand):
                         x1 = np.shape(averclos[pp, :])[0]
                         for k in NA:
                             # print 'hola 0 ',k,pp,NA,np.shape(ClosStats[k]), Nread[pp][k]
-                            ClosStats[k][pp, Nread[pp][k],
+                            ClosStats[k][pi, Nread[pi][k],
                                          :x1] = averclos[pp, :]
-                            Nread[pp][k] += 1
+                            Nread[pi][k] += 1
                         for j in range(len(averclos[pp, :])):
                             if type(averclos[pp, j]) is np.float64:
                                 print >> output, outformat % tuple(
-                                    [pol, j]+NA+[averclos[pp, j], avererr[pp, j]])
+                                    [Pols[pp], j]+NA+[averclos[pp, j], avererr[pp, j]])
                         if plot:
                             sub.plot(xaxplot[:x1], averclos[pp,
                                                             :], Polsymb[pp], label=pol)
@@ -456,13 +456,13 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
             sys.stdout.write(
                 '\r Plotting histogram for antenna %i of %i' % (ant, numant[-1]))
             sys.stdout.flush()
-            for pp in range(len(parhand)):
+            for pi,pp in enumerate(parhand):
                 fig.clf()
                 sub = fig.add_subplot(111)
                 for i in range(x1):
                     histo[i, :] = np.histogram(
-                        ClosStats[ant][pp, :Nread[pp][ant], i], bins=xxlim[1], range=xran)[0]
-                averhisto[pp, ant, :] = np.average(histo, axis=0)
+                        ClosStats[ant][pi, :Nread[pi][ant], i], bins=xxlim[1], range=xran)[0]
+                averhisto[pi, ant, :] = np.average(histo, axis=0)
                 ims = sub.imshow(np.transpose(histo), origin='lower', aspect=manaspect,
                                  interpolation='nearest', extent=[0, x1, xran[0], xran[1]])
                 sub.set_xlabel(xlab)
@@ -473,11 +473,11 @@ def closures(vis='', kind='phase', xaxis='frequency', column='data', field='-1',
                 pl.savefig(os.path.join(histdir, 'HISTO_%s_vs_%s__%s__%s.eps' % (
                     kind[:4], xaxis[:4], Pols[pp], nants[ant])))
 
-        for pp in range(len(parhand)):
+        for pi,pp in enumerate(parhand):
             fig.clf()
             sub = fig.add_subplot(111)
             manaspect = np.abs(float(numant[-1]+1)/(xran[1]-xran[0]))
-            ims = sub.imshow(np.transpose(averhisto[pp, :, :]), origin='lower',
+            ims = sub.imshow(np.transpose(averhisto[pi, :, :]), origin='lower',
                              aspect=manaspect, interpolation='nearest',
                              extent=[0, numant[-1]+0.99, xran[0], xran[1]])
             sub.set_xlabel('Antenna number')
